@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IOC Search</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 24px;
+        max-width: 1920px;
+        max-height: 3000px;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 8px 0px #ccc;
+      }
+      .search-section {
+        max-width: 300px;
+        margin-right: 20px;
+      }
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: 1px solid #007bff;
+        border-radius: 5px;
+        margin-right: 10px;
+        transition: background-color 0.3s;
+      }
+
+      .tab:hover {
+        background-color: #0056b3;
+        color: white;
+      }
+
+      .tab.active {
+        background-color: #007bff;
+        color: white;
+      }
+      .input-group {
+        margin-bottom: 10px;
+      }
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .input-group input {
+        padding: 10px 0px 10px 5px;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .input-group input[type="submit"],
+      .input-group .btn-file {
+        background-color: #007bff; /* Mavi renk için Bootstrap'in primary rengi. */
+        color: white;
+        cursor: pointer;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+
+        display: inline-block;
+        transition: background-color 0.3s;
+      }
+      .input-group input[type="submit"]:hover,
+      .input-group .btn-file:hover {
+        background-color: #0056b3; /* Daha koyu bir mavi ton. */
+      }
+      .input-group .file-hidden {
+        position: absolute;
+        opacity: 0;
+        z-index: -1;
+      }
+      .success-message {
+        color: green;
+        font-size: 1.5em;
+        text-align: center;
+        margin: 15px 0;
+      }
+
+      #snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #4caf50;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 9999;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+      }
+      #snackbar.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      }
+      #snackbar.error {
+        background-color: #f44336; /* Red color */
+      }
+      @-webkit-keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+      @keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+      @-webkit-keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 0;
+          opacity: 0;
+        }
+      }
+      @keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 0;
+          opacity: 0;
+        }
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="tabs">
+        <div class="tab" id="searchTab" onclick="showTab('search')">Search</div>
+        <div class="tab" id="fileTab" onclick="showTab('file')">File</div>
+      </div>
+      <div class="content" id="searchContent">
+        <div class="search-section">
+          <form action="/search" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+              <input
+                type="text"
+                id="ipaddress"
+                name="ioc"
+                required
+                placeholder="URL, IP address, domain, or file hash"
+              />
+            </div>
+
+            <div class="input-group">
+              <input type="submit" value="Submit" />
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="content" id="fileContent" style="display: none">
+        <!-- Dosya yükleme formu burada -->
+        <div class="input-group">
+          <label>Upload a file to get its hash:</label>
+          <label for="file" class="btn-file">Choose File</label>
+          <input
+            type="file"
+            id="file"
+            name="file"
+            class="file-hidden"
+            onchange="handleFileChange(this)"
+          />
+          <span id="filename"></span>
+        </div>
+      </div>
+      <div
+        class="overlay"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1000;
+        "
+      ></div>
+      <div
+        class="loader"
+        style="
+          display: none;
+          border: 16px solid #f3f3f3;
+          border-top: 16px solid #3498db;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 2s linear infinite;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 1001;
+        "
+      ></div>
+
+      <div class="results-section">
+        {% if ioc and ioc.ioc_type == "IPv4" %} {% include 'record_ipv4.html' %}
+        {% endif %} {% if ioc and ioc.ioc_type == "hash" %} {% include
+        'record_hash.html' %} {% endif %} {% if ioc and ioc.ioc_type == "URL" %}
+        {% include 'record_url.html' %} {% endif %} {% if ioc and ioc.ioc_type
+        == "Domain" %} {% include 'record_domain.html' %} {% endif %}
+      </div>
+    </div>
+
+    <div id="snackbar"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+
+    <script>
+      let urlParams = new URLSearchParams(window.location.search);
+      let status = urlParams.get("status");
+
+      // Modified function to accept an error flag
+      function showSnackbar(message, isError = false) {
+        let snackbar = document.getElementById("snackbar");
+        snackbar.textContent = message;
+        snackbar.className = "show";
+        if (isError) {
+          snackbar.classList.add("error");
+        }
+        setTimeout(function () {
+          snackbar.className = snackbar.className.replace("show", "");
+          if (isError) {
+            snackbar.classList.remove("error");
+          }
+        }, 3000);
+      }
+
+      if (status === "created") {
+        showSnackbar("Data sent successfully");
+      } else if (status === "exists") {
+        showSnackbar("The IoC already exists in the database");
+      } else if (status === "error") {
+        showSnackbar("An error occurred", true);
+      }
+
+      async function handleFileChange(inputElement) {
+        if (inputElement.files && inputElement.files.length > 0) {
+          let file = inputElement.files[0];
+
+          let currentInputValue = document.getElementById("ipaddress").value;
+          if (currentInputValue && currentInputValue !== "") {
+            let shouldOverwrite = confirm("Mevcut değer üzerine yazilsin mi?");
+            if (!shouldOverwrite) return;
+          }
+
+          document.getElementById("filename").textContent = file.name;
+          showLoading(); // Yükleniyor animasyonunu göster.
+          let hashValue = await computeHash(file);
+          hideLoading(); // Yükleniyor animasyonunu gizle.
+          document.getElementById("ipaddress").value = hashValue;
+
+          // Dosyanın hash değeri hesaplandıktan sonra formu otomatik olarak gönder.
+          showLoading(); // <-- Bu satırı ekliyoruz. Form gönderilirken animasyonu gösteriyoruz.
+          document.querySelector("form").submit();
+        } else {
+          document.getElementById("filename").textContent = "";
+          document.getElementById("ipaddress").value = "";
+        }
+      }
+
+      document
+        .getElementById("ipaddress")
+        .addEventListener("input", function () {
+          // Eğer input'ta manuel bir değişiklik yapılırsa, dosya adını ve dosya seçimini temizle.
+          if (this.value !== "") {
+            document.getElementById("filename").textContent = "";
+            document.getElementById("file").value = "";
+          }
+        });
+
+      function computeHash(file) {
+        return new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.onload = function (event) {
+            let binary = event.target.result;
+            let hash = CryptoJS.SHA256(
+              CryptoJS.lib.WordArray.create(binary)
+            ).toString();
+            resolve(hash);
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      }
+      document
+        .getElementById("ipaddress")
+        .addEventListener("input", function () {
+          if (this.value !== "") {
+            document.getElementById("filename").textContent = "";
+            // File input'un değerini temizle
+            document.getElementById("file").value = "";
+          }
+        });
+      function showTab(tabName) {
+        if (tabName === "search") {
+          document.getElementById("searchContent").style.display = "block";
+          document.getElementById("fileContent").style.display = "none";
+          document.getElementById("searchTab").classList.add("active");
+          document.getElementById("fileTab").classList.remove("active");
+        } else if (tabName === "file") {
+          document.getElementById("searchContent").style.display = "none";
+          document.getElementById("fileContent").style.display = "block";
+          document.getElementById("searchTab").classList.remove("active");
+          document.getElementById("fileTab").classList.add("active");
+        }
+      }
+      document.querySelector("form").addEventListener("submit", function (e) {
+        showLoading();
+      });
+
+      function showLoading() {
+        document.querySelector(".overlay").style.display = "block";
+        document.querySelector(".loader").style.display = "block";
+      }
+
+      function hideLoading() {
+        document.querySelector(".overlay").style.display = "none";
+        document.querySelector(".loader").style.display = "none";
+      }
+      
+    </script>
+  </body>
+</html>

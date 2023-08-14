@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "IOC"
+version = "0.1.0"
+description = "ioc analysis"
+authors = ["emre <emre@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python-multipart = "^0.0.5"  #github link verisi vb.
+tenacity = "^7.0.0" 
+OTXv2 = "^1.2" 
+python-dotenv = "^0.19.2"
+python = "3.11.4"
+psycopg2-binary = "^2.9.1"
+aiohttp = "3.8.4"
+dynaconf = "3.2.0"
+fastapi = "0.100.0"
+uvicorn = "0.22.0"
+sqlalchemy = "1.4.29"
+jinja2 = "3.1.2"
+httpx = "0.24.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IoCs</title>
+    <style>
+      .results-card {
+        background-color: #fff;
+        border-radius: 10px;
+        /* box-shadow: 0px 0px 8px 0px #ccc; */
+        padding: 20px;
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .card-item {
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        padding: 20px;
+        margin: 10px;
+        width: calc(25% - 10px);
+        box-shadow: 0px 0px 8px 0px #ccc;
+        position: relative;
+      }
+
+      .card-item h4,
+      .card-item p {
+        margin: 5px 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .info-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #007bff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        /* display: none;  */
+      }
+
+      .popup-content {
+        display: none;
+        background-color: white;
+        position: absolute;
+        top: 30px;
+        right: 0;
+        width: 400px;
+        box-shadow: 0px 0px 8px 0px #ccc;
+        z-index: 1;
+        padding: 10px;
+        max-height: 300px;
+        /* Maksimum yüksekliği belirtin. Bu değeri ihtiyacınıza göre ayarlayabilirsiniz. */
+        overflow-y: auto; /* Yatay kaydırma otomatik olarak etkinleştirilir. */
+        overflow-x: hidden;
+      }
+      .copy-btn {
+        position: absolute;
+        top: 5px;
+        right: 30px; /* info-btn'den biraz sola kaydırıyoruz */
+
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        color: white;
+        text-align: center;
+        cursor: pointer;
+        display: none; /* Başlangıçta görünmez yapıyoruz. */
+      }
+      #snackbar {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #4caf50;
+        color: #ffffff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 10px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+        transition: visibility 0.5s, bottom 0.5s;
+      }
+
+      #snackbar.show {
+        visibility: visible;
+        bottom: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="results-card">
+      <!-- IoC Card -->
+      <div class="card-item">
+        <h4>IoC</h4>
+        <p>{{ ioc.ioc }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.ioc }}</div>
+      </div>
+
+      <!-- Other cards -->
+      <div class="card-item">
+        <h4>Type</h4>
+        <p>{{ ioc.ioc_type }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.ioc_type }}</div>
+      </div>
+
+      <div class="card-item">
+        <h4>Blacklist</h4>
+        <p>{{ ioc.blacklist }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.blacklist }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Whois</h4>
+        <p>{{ ioc.whois }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.whois }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Malicious</h4>
+        <p>{{ ioc.malicious }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.malicious }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Geometric_Location</h4>
+        <p>{{ ioc.geometric_location }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.geometric_location }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Isp</h4>
+        <p>{{ ioc.isp }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.isp }}</div>
+      </div>
+      <div class="card-item">
+        <h4>City</h4>
+        <p>{{ ioc.city }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.city }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Country</h4>
+        <p>{{ ioc.country }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.country }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Related_Tags</h4>
+        <p>{{ ioc.related_tags }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.related_tags }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Last_Analysis_Date</h4>
+        <p>{{ ioc.last_analysis_date }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.last_analysis_date }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Abuse_Ip</h4>
+        <p>{{ ioc.abuse_ip_db }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.abuse_ip_db }}</div>
+      </div>
+      <div class="card-item">
+        <h4>Greynois_Data</h4>
+        <p>{{ ioc.grey_nois_data }}</p>
+        <div class="info-btn" onclick="showPopup(this)">i</div>
+        <div class="copy-btn" onclick="copyInfo(this)">📋</div>
+        <div class="popup-content">{{ ioc.grey_nois_data }}</div>
+      </div>
+
+      <!--... Continue in the same manner for other cards ...-->
+    </div>
+    <div id="snackbar">Information copied!</div>
+
+    <script>
+      function showSnackbar() {
+        let snackbar = document.getElementById("snackbar");
+        snackbar.className = "show";
+        setTimeout(function () {
+          snackbar.className = snackbar.className.replace("show", "");
+        }, 3000); // 3 saniye sonra snackbar'ı gizleyin.
+      }
+
+      function copyInfo(btn) {
+        let content = btn.nextElementSibling;
+        let textArea = document.createElement("textarea");
+        textArea.value = content.innerText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        showSnackbar("Information copied!");
+      }
+      function showPopup(btn) {
+        let content = btn.nextElementSibling.nextElementSibling; // ilk nextElementSibling copy butonunu alır, ikincisi popup-content'i alır.
+        if (content.style.display === "block") {
+          content.style.display = "none";
+        } else {
+          content.style.display = "block";
+        }
+      }
+
+      window.onload = function () {
+        const cards = document.querySelectorAll(".card-item");
+
+        cards.forEach((card) => {
+          const pElement = card.querySelector("p");
+          const infoBtn = card.querySelector(".info-btn");
+          const copyBtn = card.querySelector(".copy-btn");
+
+          if (pElement.scrollWidth > pElement.clientWidth) {
+            // Content is truncated and therefore show the info button
+            infoBtn.style.display = "block";
+            copyBtn.style.display = "block"; // Burada kopyala düğmesini de gösteriyoruz.
+          } else {
+            infoBtn.style.display = "none";
+            copyBtn.style.display = "none"; // Kopyala düğmesini de gizliyoruz.
+          }
+        });
+      };
+    </script>
+  </body>
+</html>
