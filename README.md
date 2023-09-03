@@ -17,10 +17,15 @@ This project is designed as a tool to analyze given IoCs (Indicators of Compromi
 ## Technologies Used
 
 - Python 3.11
+  
 - PostgreSQL
+  
 - FastAPI (https://fastapi.tiangolo.com/)
+  
 - SQLAlchemy ORM (https://docs.sqlalchemy.org/)
+  
 - Docker Compose
+  
 - Poetry (https://python-poetry.org/docs/)
 
 
@@ -36,10 +41,12 @@ This project is designed as a tool to analyze given IoCs (Indicators of Compromi
 
 The project offers a simple and convenient way to query IoC types using the "/search" endpoint:
 
-# Query IoC Types
+## Query IoC Types
 
 -> HTTP Method: POST
+
 -> URL: `http://localhost:8000/search?type=example_type`
+
 -> To retrieve IoCs of a specific type, make a POST request to the "/search" endpoint, specifying the desired IoC type as a query parameter. The endpoint will respond with the relevant IoCs matching the specified type.
 
 
